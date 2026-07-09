@@ -37,12 +37,31 @@ Todos os tamanhos em pixel escalam pelo uniform `px` (referência: 1200px no
 menor lado), então o preview em baixa resolução e o export em alta ficam
 visualmente idênticos.
 
+### LUTs 3D de câmeras (`effects/Luts.kt`)
+
+Além do grade paramétrico, cada preset pode aplicar uma **LUT 3D** emulando
+a color science de uma digicam específica: **Sony CCD** (Cyber-shot, frio,
+sombras teal), **Canon IXUS** (quente, highlight magenta), **Kodak
+EasyShare** (amarelão, vermelhos gritados) e **Fuji FinePix** (esverdeado,
+contraste macio). As LUTs são geradas parametricamente em runtime (32³,
+white balance → gamma → curva S → tint por luma → saturação) — nada de
+assets binários — e viram uma textura 2D em faixa (fatias de azul lado a
+lado) que o shader amostra com lookup trilinear. Dá pra trocar a câmera e a
+intensidade da LUT nos ajustes finos.
+
 ### Preview em tempo real
 
 O `EditorScreen` aplica o shader direto na composição via
 `Modifier.graphicsLayer { renderEffect = RenderEffect.createRuntimeShaderEffect(...) }`
 — slider mexeu, GPU re-renderiza o frame. Segurar o dedo na foto mostra a
-original.
+original. Além do slider mestre ("vibe"), o painel **ajustes finos** expõe
+um slider por uniform do shader + a escolha de câmera (LUT).
+
+A **câmera também filtra ao vivo**: o `CameraScreen` aplica o mesmo shader
+no `PreviewView` via `View.setRenderEffect`, com o grain animado por um
+loop que troca o seed (~11fps, vibe VHS). O `PreviewView` roda em modo
+`COMPATIBLE` (TextureView) porque RenderEffect não pega em SurfaceView.
+O preset escolhido na câmera já abre selecionado no editor.
 
 ### Export (`export/Exporter.kt`)
 
@@ -50,7 +69,9 @@ original.
 2. Roda o shader offscreen na GPU (`HardwareRenderer` + `ImageReader`,
    porque RuntimeShader não roda em Canvas de software)
 3. Desenha o **timestamp laranja 7-segmentos** por cima
-   (`TimestampRenderer` — desenhado com paths, sem fonte)
+   (`TimestampRenderer` — desenhado com paths, sem fonte). A era é
+   configurável: data de hoje, "modo 2003" ou "modo 1999" — presets nostálgicos
+   já vêm com ano fake por padrão (Digicam ’03 carimba ’03, Orkut ’07…)
 4. **Compressão JPEG real** em N gerações (`JpegCrusher`) — blocking e
    mosquito noise autênticos, tipo foto que passou por MSN → Fotolog → Orkut
 5. Salva em `Pictures/appy2k` via MediaStore
@@ -74,8 +95,7 @@ Requer JDK 17+ e Android SDK (compileSdk 35).
 
 ## Ideias pra depois
 
-- Sliders individuais por efeito (os uniforms já existem, é só ligar UI)
-- LUTs 3D reais de câmeras específicas (Sony Cyber-shot, Canon IXUS)
-- Grain animado / export de vídeo curto
-- Datas fake no timestamp ("modo 2003")
-- Filtro no preview da câmera (RenderEffect no PreviewView)
+- Export de vídeo curto com grain animado
+- LUTs carregadas de arquivos .cube (as atuais são paramétricas)
+- Frente/verso de câmera e zoom no CameraScreen
+- Salvar presets customizados do usuário

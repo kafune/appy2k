@@ -29,10 +29,12 @@ val PRESETS: List<Preset> = listOf(
             grain = 0.3f,
             vignette = 0.2f,
             blockiness = 0.25f,
+            lut = "sony_ccd",
             jpegQuality = 55,
             jpegPasses = 1,
             outputLongEdge = 1600,
             timestamp = true,
+            timestampYearOffset = -23, // sua foto "de 2003"
         ),
     ),
     Preset(
@@ -48,9 +50,11 @@ val PRESETS: List<Preset> = listOf(
             grain = 0.45f,
             vignette = 0.55f,
             blockiness = 0.2f,
+            lut = "canon_ixus",
             jpegQuality = 60,
             outputLongEdge = 1600,
             timestamp = true,
+            timestampYearOffset = -22,
         ),
     ),
     Preset(
@@ -67,6 +71,8 @@ val PRESETS: List<Preset> = listOf(
             colorCast = 0.4f,
             grain = 0.7f,
             vignette = 0.5f,
+            lut = "fuji_finepix",
+            lutMix = 0.7f,
             jpegQuality = 70,
             outputLongEdge = 1800,
         ),
@@ -83,10 +89,12 @@ val PRESETS: List<Preset> = listOf(
             grain = 0.2f,
             poster = 0.65f,
             blockiness = 0.6f,
+            lut = "kodak_easyshare",
             jpegQuality = 28,
             jpegPasses = 2,
             outputLongEdge = 1280,
             timestamp = true,
+            timestampYearOffset = -19, // era Orkut
         ),
     ),
     Preset(
@@ -121,9 +129,12 @@ val PRESETS: List<Preset> = listOf(
             grain = 0.6f,
             vignette = 0.7f,
             blockiness = 0.3f,
+            lut = "canon_ixus",
+            lutMix = 0.8f,
             jpegQuality = 45,
             outputLongEdge = 1600,
             timestamp = true,
+            timestampYearOffset = -18, // fundo do poço emo: 2008
         ),
     ),
 )

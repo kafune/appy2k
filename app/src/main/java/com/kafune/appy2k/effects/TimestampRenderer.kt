@@ -31,11 +31,18 @@ object TimestampRenderer {
         0b1101111, // 9
     )
 
-    fun draw(canvas: Canvas, width: Int, height: Int, timeMillis: Long = System.currentTimeMillis()) {
+    fun draw(
+        canvas: Canvas,
+        width: Int,
+        height: Int,
+        yearOffset: Int = 0,
+        timeMillis: Long = System.currentTimeMillis(),
+    ) {
         val cal = Calendar.getInstance().apply { setTimeInMillis(timeMillis) }
         val day = cal.get(Calendar.DAY_OF_MONTH)
         val month = cal.get(Calendar.MONTH) + 1
-        val year = cal.get(Calendar.YEAR) % 100
+        // yearOffset deixa a foto "de 2003" (offset -23 em 2026)
+        val year = ((cal.get(Calendar.YEAR) + yearOffset) % 100 + 100) % 100
         val text = "%02d %02d '%02d".format(day, month, year)
 
         val digitH = minOf(width, height) * 0.055f

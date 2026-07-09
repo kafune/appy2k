@@ -20,12 +20,15 @@ data class EffectParams(
     val vignette: Float = 0f,      // 0..1
     val poster: Float = 0f,        // 0..1 posterização + dither
     val blockiness: Float = 0f,    // 0..1 blocos de chroma fake
+    val lut: String = Luts.NONE,   // id da LUT 3D de câmera (Luts.ALL)
+    val lutMix: Float = 1f,        // 0..1 intensidade da LUT
     val seed: Float = 7f,
     // export
     val jpegQuality: Int = 92,     // qualidade da compressão real
     val jpegPasses: Int = 1,       // quantas gerações de recompressão
     val outputLongEdge: Int = 2048,// resolução de saída (1600 = digicam raiz)
     val timestamp: Boolean = false,
+    val timestampYearOffset: Int = 0, // ex.: -23 => "modo 2003"
 ) {
     companion object {
         val NEUTRAL = EffectParams()
@@ -53,6 +56,8 @@ fun EffectParams.scaledBy(t: Float): EffectParams {
         vignette = lerp(n.vignette, vignette, t),
         poster = lerp(n.poster, poster, t),
         blockiness = lerp(n.blockiness, blockiness, t),
+        // a LUT some junto com o resto quando a intensidade cai
+        lutMix = lerp(0f, lutMix, t),
         jpegQuality = lerp(n.jpegQuality.toFloat(), jpegQuality.toFloat(), t).toInt(),
     )
 }

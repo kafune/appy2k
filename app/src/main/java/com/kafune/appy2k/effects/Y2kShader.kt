@@ -25,6 +25,9 @@ import org.intellij.lang.annotations.Language
 @Language("AGSL")
 const val Y2K_SHADER_SRC = """
 uniform shader src;
+uniform shader lut;
+uniform float lutSize;
+uniform float lutMix;
 uniform float2 res;
 uniform float px;
 uniform float softness;
@@ -58,6 +61,20 @@ float3 fetch(float2 uv) {
     float g = src.eval(uv).g;
     float b = src.eval(uv - off).b;
     return float3(r, g, b);
+}
+
+// LUT 3D numa faixa 2D: fatia = azul, x = vermelho, y = verde.
+// Lookup bilinear dentro da fatia + blend entre duas fatias = trilinear.
+float3 applyLut(float3 c) {
+    float n = lutSize;
+    float zb = clamp(c.b, 0.0, 1.0) * (n - 1.0);
+    float z0 = floor(zb);
+    float z1 = min(z0 + 1.0, n - 1.0);
+    float x = clamp(c.r, 0.0, 1.0) * (n - 1.0) + 0.5;
+    float y = clamp(c.g, 0.0, 1.0) * (n - 1.0) + 0.5;
+    float3 s0 = lut.eval(float2(z0 * n + x, y)).rgb;
+    float3 s1 = lut.eval(float2(z1 * n + x, y)).rgb;
+    return mix(s0, s1, zb - z0);
 }
 
 // Blur em cruz barato = softness de digicam.
@@ -123,6 +140,11 @@ half4 main(float2 fragCoord) {
     float l1 = dot(c, LUMA);
     c = mix(float3(l1), c, saturation);
 
+    // --- LUT 3D de câmera específica ---
+    if (lutMix > 0.001) {
+        c = mix(c, applyLut(c), lutMix);
+    }
+
     // --- vinheta ---
     float2 vd = (uv - res * 0.5) / (0.5 * max(res.x, res.y));
     c *= 1.0 - vignette * 0.45 * smoothstep(0.35, 1.3, dot(vd, vd));
@@ -173,4 +195,8 @@ fun RuntimeShader.applyParams(params: EffectParams, width: Float, height: Float)
     setFloatUniform("poster", params.poster)
     setFloatUniform("blockiness", params.blockiness)
     setFloatUniform("seed", params.seed)
+    // LUT sempre vinculada (identidade quando "none") pra todo uniform ter valor
+    setInputShader("lut", Luts.shader(params.lut))
+    setFloatUniform("lutSize", Luts.SIZE.toFloat())
+    setFloatUniform("lutMix", if (params.lut == Luts.NONE) 0f else params.lutMix)
 }

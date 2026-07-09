@@ -32,7 +32,10 @@ object Exporter {
             input.recycle()
 
             if (params.timestamp) {
-                TimestampRenderer.draw(Canvas(result), result.width, result.height)
+                TimestampRenderer.draw(
+                    Canvas(result), result.width, result.height,
+                    yearOffset = params.timestampYearOffset,
+                )
             }
 
             result = JpegCrusher.crush(result, params.jpegQuality, params.jpegPasses)

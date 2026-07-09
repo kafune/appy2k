@@ -17,7 +17,7 @@ import com.kafune.appy2k.ui.theme.Appy2kTheme
 sealed interface Screen {
     data object Home : Screen
     data object Camera : Screen
-    data class Editor(val source: Uri) : Screen
+    data class Editor(val source: Uri, val initialPreset: Int = 1) : Screen
 }
 
 class MainActivity : ComponentActivity() {
@@ -40,11 +40,12 @@ private fun AppRoot() {
             onPickPhoto = { uri -> screen = Screen.Editor(uri) },
         )
         is Screen.Camera -> CameraScreen(
-            onCaptured = { uri -> screen = Screen.Editor(uri) },
+            onCaptured = { uri, presetIndex -> screen = Screen.Editor(uri, presetIndex) },
             onBack = { screen = Screen.Home },
         )
         is Screen.Editor -> EditorScreen(
             source = s.source,
+            initialPreset = s.initialPreset,
             onBack = { screen = Screen.Home },
         )
     }
